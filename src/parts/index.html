@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="http://dev.tim-hav.de/Uncut/scripts/parts.js"></script>
+        <script src="http://dev.tim-hav.de/Uncut/scripts/p5.js"></script>
+
+        <style>
+
+            body {
+                background: #1c1c1c;
+                max-width: 900px;
+            }
+
+            body span {
+                font-family: sans-serif;
+            }
+
+            #container {
+                display: flex;
+                flex-flow: row wrap;
+                width: 100%;
+            }
+
+            #container * {
+                margin-right: 2px;
+            }
+
+            #container input {
+                display: flex;
+                flex-flow: column nowrap;
+                width: 100px;
+            }
+
+            #container canvas {
+                cursor: pointer;
+            }
+
+            .exportData {
+                position: absolute;
+                left: 0;
+                top: 0;
+                background: rgba(0, 0, 0, 0.6);
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .exportData textarea {
+                margin: 0px;
+                height: 400px;
+                width: 460px;
+            }
+
+            .exportData[data-display="false"] {
+                display: none;
+            }
+
+            .importData {
+                position: absolute;
+                left: 0;
+                top: 0;
+                background: rgba(0, 0, 0, 0.6);
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-flow: column;
+            }
+
+            .importData textarea {
+                margin: 0px;
+                height: 400px;
+                width: 460px;
+            }
+
+            .importData[data-display="false"] {
+                display: none;
+            }
+
+            .menu {
+                width: 100%;
+                padding: 3px;
+                margin-bottom: 10px;
+            }
+
+            .menu button {
+                cursor: pointer;
+            }
+
+            .counter {
+                margin-left: 10px;
+                color: white;
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <div class="exportData" data-display="false">
+            <textarea id="exportCode" placeholder="data"></textarea>
+        </div>
+
+        <div class="importData" data-display="false">
+            <textarea id="importCode" placeholder="data"></textarea>
+            <button id="importBtn">Import</button>
+        </div>
+
+        <div class="menu">
+            <button id="add">Add</button>
+            <button id="export">Export</button>
+            <button id="import">Import</button>
+            <span class="counter"><span>Count: </span><a class="count"></a></span>
+        </div>
+
+        <script>
+
+            var ele = document.querySelector(".exportData");
+            document.querySelector("#export").addEventListener("click", function(e) {
+                document.querySelector("#exportCode").value = exportData();
+                toggleWindow(ele);
+            });
+
+            ele.addEventListener("click", function(e) {
+                if(e.srcElement.id != "exportCode") {
+                    toggleWindow(ele);
+                }
+            });
+
+            document.querySelector("#add").addEventListener("click", function(e) {
+                createPart(p5s.length, null, function(part) {
+                    p5s.push(part);
+                });
+            });
+
+
+            var iele = document.querySelector(".importData");
+            document.querySelector("#import").addEventListener("click", function(e) {
+                toggleWindow(iele);
+            });
+
+            iele.addEventListener("click", function(e) {
+                if(e.srcElement.id != "importCode") {
+                    toggleWindow(iele);
+                }
+            });
+
+            document.querySelector("#importBtn").addEventListener("click", function() {
+                importData(
+                    JSON.parse(document.querySelector("#importCode").value)
+                );
+            });
+
+            function toggleWindow(e) {
+                if(e.dataset.display == "true") {
+                    e.dataset.display = false;
+                } else {
+                    e.dataset.display = true;
+                }
+            }
+
+        </script>
+
+        <div id="container">
+        </div>
+
+        <script type="text/javascript">
+
+            var p5s = [];
+            var blockSize;
+
+            window.onload = function() {
+                renderData(null);
+            }
+
+            function renderData(d) {
+                document.querySelector("#container").innerHTML = "";
+                p5s = [];
+                var iD = d || parts;
+                for( part in iD ) {
+                    var data = iD[part];
+                    createPart(part, data, function(part) {
+                        p5s.push(part);
+                    });
+                }
+            }
+
+            function exportData() {
+                var res = [];
+                for( c in p5s ) {
+                    res.push(p5s[c].data);
+                }
+                return JSON.stringify(res);
+            }
+
+            function importData(data) {
+                renderData(data);
+            }
+
+            function createPart(id, data, callback) {
+
+                var div = document.createElement("div");
+                div.id = "cont" + id;
+                document.querySelector("#container").appendChild(div);
+
+                res = new p5(function(sketch) {
+
+                    sketch.setup = function() {
+                        var canvas = sketch.createCanvas(100, 100);
+                        canvas.parent(div.id);
+                        sketch.background(0);
+
+                        blockSize = sketch.width/4;
+
+                        sketch.renderList = [];
+
+                        if(data) {
+                            sketch.data = data;
+                        } else {
+                            sketch.data = {
+                                "data":[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],
+                                "rank":0
+                            };
+                        }
+
+                        var input = document.createElement("input");
+                        input.value = sketch.data.rank;
+                        input.setAttribute("placeholder", "rank");
+                        div.appendChild(input);
+
+                        document.querySelector("#container").addEventListener("click", function(e) {
+                            var ele = e.srcElement;
+                            if(ele.id.match("defaultCanvas*")) {
+                                if(ele.id == sketch._curElement.canvas.id) {
+                                    var borders = ele.getBoundingClientRect();
+                                    var x = Math.floor((e.clientX-borders.left)/blockSize);
+                                    var y = Math.floor((e.clientY-borders.top)/blockSize);
+                                    if( sketch.data.data[y][x] == 1 ) {
+                                        sketch.data.data[y][x] = 0;
+                                    } else {
+                                        sketch.data.data[y][x] = 1;
+                                    }
+                                }
+                            }
+                        });
+
+                        input.addEventListener("input", function(e) {
+                            var ele = e.srcElement.parentNode.querySelector("canvas");
+                            if(ele.id == sketch._curElement.canvas.id) {
+                                var val = e.srcElement.value;
+                                sketch.data.rank = parseInt(val);
+                            }
+                        });
+
+                    };
+
+                    sketch.draw = function() {
+
+                        sketch.background(0);
+
+                        for( i in sketch.data.data ) {
+                            for( j in sketch.data.data[i] ) {
+                                if(sketch.data.data[i][j] == 1) {
+                                    sketch.fill(255);
+                                    sketch.rect(
+                                        j * blockSize,
+                                        i * blockSize,
+                                        blockSize,
+                                        blockSize
+                                    );
+                                }
+                            }
+                        }
+
+                        document.querySelector(".count").innerText = document.querySelector("#container").children.length;
+
+                    };
+
+                })
+
+                callback(res);
+
+            }
+
+        </script>
+
+    </body>
+</html>

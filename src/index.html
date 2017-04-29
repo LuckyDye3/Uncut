@@ -1,0 +1,82 @@
+<html>
+
+	<head>
+
+		<link type="text/css" rel="stylesheet" href="./css/main.css">
+
+		<script src="./scripts/jquery.js"></script>
+		<script src="./scripts/p5.js"></script>
+		<script src="./scripts/parts.js"></script>
+		<script src="./scripts/engine.js"></script>
+
+		<meta content='width=device-width, initial-scale=1.0, user-scalable=0' name='viewport' />
+
+	</head>
+
+	<body>
+
+		<div class="main">
+            <div class="deadScreen" data-display="false">
+				<div class="wrapper">
+					<div class="stats">
+						<span class="row"><a>Score: </a><a class="score"></a></span>
+						<span class="row"><a>Highscore: </a><a class="highscore"></a></span>
+					</div>
+					<div class="retry Btn">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 258 282">
+							<path class="cls-1" d="M129,60a93,93,0,1,0,93,93h36A129,129,0,1,1,129,24V0l81,42L129,84Z"/>
+						</svg>
+					</div>
+					<div class="back Btn">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 108.85">
+							<path class="cls-1" d="M120,38H54.63l10-10c6.71-6.71,7.09-17.22.84-23.47S48.74-1.42,42,5.29L5.56,41.76c-.15.15-.28.31-.42.46A15.94,15.94,0,0,0,0,54H0A15.94,15.94,0,0,0,5.24,65.77c.17.19.34.39.52.57l37.07,37.07c6.82,6.82,17.42,7.29,23.67,1s5.78-16.85-1-23.67L54.63,70H120a16,16,0,0,0,16-16h0A16,16,0,0,0,120,38Z"/>
+						</svg>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="unlocksScreen" data-display="false">
+
+				<div class="back Btn">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 108.85">
+						<path class="cls-1" d="M120,38H54.63l10-10c6.71-6.71,7.09-17.22.84-23.47S48.74-1.42,42,5.29L5.56,41.76c-.15.15-.28.31-.42.46A15.94,15.94,0,0,0,0,54H0A15.94,15.94,0,0,0,5.24,65.77c.17.19.34.39.52.57l37.07,37.07c6.82,6.82,17.42,7.29,23.67,1s5.78-16.85-1-23.67L54.63,70H120a16,16,0,0,0,16-16h0A16,16,0,0,0,120,38Z"/>
+					</svg>
+				</div>
+
+				<div class="wrapper">
+					<div class="unlockslist">
+						<!-- Unlocks -->
+
+					</div>
+					<div class="doneunlockslist">
+						<!-- Unlocks -->
+
+					</div>
+				</div>
+
+			</div>
+
+			<div class="startScreen" data-display="true">
+				<div class="wrapper">
+					<div class="row">
+						<h1 class="title">Uncut</h1>
+						<a class="version">0.1.9.1</a>
+					</div>
+					<div class="row">
+						<div class="playBtn">Play</div>
+						<span class="container"><a>Highscore: </a><a class="highscore"></a></span>
+						<span class="container"><a>Crashes: </a><a class="crashes"></a></span>
+						<div class="unlocksBtn" style="display:none">Unlocks</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="./scripts/objects.js"></script>
+		<script src="./scripts/events.js"></script>
+		<script src="./scripts/unlocks.js"></script>
+		<script src="./scripts/main.js"></script>
+	</body>
+
+</html>
