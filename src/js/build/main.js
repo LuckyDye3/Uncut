@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var game;
+var game = void 0;
 var logging = false;
 
 window.onload = function () {
@@ -33,7 +33,7 @@ var Main = function () {
 
         this.playerSkin = Assets.skins[0];
 
-        this.isGameOver = false;
+        this.isGameOver = true;
 
         this.init();
     }
@@ -42,17 +42,16 @@ var Main = function () {
         key: "init",
         value: function init() {
 
-            this.width = window.innerWidth;
-            if (screen.width > 720) {
-                this.width = 600;
-            }
-            this.height = 350;
+            this.width = 850;
+            this.height = 530;
 
-            this.blockSize = 18;
+            this.blockSize = 30;
 
             this.Menu = new _Menu(this);
             this.Unlocks = new _Unlocks(this);
             this.Input = new _Input(this);
+
+            this.steps = 0;
 
             this.initScene();
 
@@ -86,7 +85,6 @@ var Main = function () {
         key: "initScene",
         value: function initScene() {
 
-            this.score = 0;
             this.camera = new _Camera(-this.width / 2, 0);
             this.Renderer = new _Renderer(this, {
                 camera: this.camera,
@@ -116,10 +114,10 @@ var Main = function () {
     }, {
         key: "run",
         value: function run() {
-            // game logic
-            log("Running.");
+            this.score = 0;
             this.isGameOver = false;
             this.Renderer.run();
+            log("Running.");
         }
     }, {
         key: "pause",
@@ -131,7 +129,7 @@ var Main = function () {
         key: "resume",
         value: function resume() {
             log("Resuming.");
-            if (!this.isGameOver) {
+            if (!this.isGameOver && !this.Renderer.running) {
                 this.Renderer.resume();
             }
         }
@@ -147,11 +145,12 @@ var Main = function () {
     }, {
         key: "onRender",
         value: function onRender() {
-            this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width / 80, 60);
+            //this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width/80, 60);
+            this.Menu.HUD.setScore(this.score);
         }
     }, {
         key: "onUpdate",
-        value: function onUpdate(dt) {
+        value: function onUpdate(dt, tr) {
             // on update
             this.score += 1;
 
@@ -180,7 +179,12 @@ var Main = function () {
                     y: -bs / 2,
                     w: bs,
                     h: bs
-                }).rect();
+                }).sprite({
+                    x: 0,
+                    y: 1,
+                    res: 128,
+                    type: "STATIC"
+                });
                 this.ground.unshift(btemp);
 
                 if (id > w) {
@@ -203,11 +207,12 @@ var Main = function () {
 
             var lastItem = this.ground.length - 1;
             if (this.ground[lastItem].location.x + this.camera.location.x < -this.width / 2 - 20) {
-                this.ground.splice(lastItem, 1);
+                this.ground.pop(lastItem, 1);
             }
 
-            this.camera.location.x -= 190 * dt;
-            this.player.location.x += 190 * dt;
+            var step = 6 / tr || 0.6;
+            this.camera.location.x -= step;
+            this.player.location.x += step;
         }
     }, {
         key: "gameOver",
@@ -260,7 +265,7 @@ var Player = function (_Entity) {
 
         _this.clickCounter = 0;
         _this.airborn = true;
-        _this.jumpPower = 650;
+        _this.jumpPower = 800;
         _this.gravity = -9.81 / 2;
 
         _this.history = [];
@@ -399,8 +404,11 @@ var Structure = function () {
                             w: bs,
                             h: bs,
                             collider: true
-                        }).rect({
-                            stroke: true
+                        }).sprite({
+                            x: 1,
+                            y: 1,
+                            res: 128,
+                            type: "STATIC"
                         });
                         this.renderGroup.add(btemp);
                     }

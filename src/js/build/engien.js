@@ -58,12 +58,22 @@ var _Menu = function () {
         this.deadScreen = this.domCach.find(".deadScreen");
         this.unlocksScreen = this.domCach.find(".unlocksScreen");
         this.unlockslist = this.domCach.find(".unlocksScreen .unlockslist");
+        this.HUDDom = this.domCach.find("#HUD");
+        this.scoreDisplay = this.HUDDom.find(".scoreDisplay");
 
         this.clear();
         this.startScreen.removeClass("hidden");
 
         this.update();
         this.bindEvents();
+
+        var scoreDisplay = this.scoreDisplay[0];
+
+        this.HUD = {
+            setScore: function setScore(s) {
+                scoreDisplay.innerText = s;
+            }
+        };
     }
 
     _createClass(_Menu, [{
@@ -105,12 +115,14 @@ var _Menu = function () {
             this.startScreen.addClass("hidden");
             this.unlocksScreen.addClass("hidden");
             this.deadScreen.addClass("hidden");
+            this.HUDDom.addClass("hidden");
         }
     }, {
         key: "play",
         value: function play() {
             game.reset();
             this.clear();
+            this.HUDDom.removeClass("hidden");
         }
     }, {
         key: "unlocks",
@@ -199,9 +211,6 @@ var Location = function (_Vector) {
 
         var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, x, y, z));
 
-        _this.getX = function () {
-            _this.x;
-        };
         _this.getY = function () {
             _this.y;
         };
@@ -210,6 +219,13 @@ var Location = function (_Vector) {
         };
         return _this;
     }
+
+    _createClass(Location, [{
+        key: "getX",
+        value: function getX() {
+            return this.x;
+        }
+    }]);
 
     return Location;
 }(Vector);
@@ -276,33 +292,40 @@ var _Renderer = function () {
     }, {
         key: "run",
         value: function run() {
-            var _this2 = this;
 
-            var lasttick = void 0;
+            var MAX_FPS = 60;
             var updaterate = 1 / 508;
+            var lasttick = 0;
+            var lastframe = 0;
             var interval = 0;
-
+            var main = this;
             var loop = function loop(curtick) {
 
                 if (lasttick) {
                     interval += (curtick - lasttick) / 1000;
+                    lastframe += performance.now() - lasttick;
+
                     while (interval > updaterate) {
-                        if (_this2.running) {
-                            _this2.tickrate = curtick - lasttick;
+                        if (main.running) {
+                            main.tickrate = curtick - lasttick;
                             interval -= updaterate;
-                            _this2.update(updaterate, _this2.tickrate);
+                            main.update(updaterate, main.tickrate / (100 / main.framerate));
                         } else {
                             break;
                         }
                     }
-                    _this2.draw(_this2.camera);
-                }
 
-                _this2.framerate = 1000 / (curtick - lasttick);
+                    if (lastframe >= 1 / MAX_FPS * 1000) {
+
+                        main.draw(main.camera);
+                        main.framerate = 1000 / (curtick - lasttick);
+                        lastframe = 0;
+                    }
+                }
                 lasttick = curtick;
 
-                if (_this2.running) {
-                    window.requestAnimationFrame(loop.bind(_this2));
+                if (main.running) {
+                    window.requestAnimationFrame(loop.bind(main));
                 }
             };
 
@@ -407,7 +430,7 @@ var _Renderer = function () {
         }
     }, {
         key: "update",
-        value: function update(dt) {
+        value: function update(dt, tr) {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
@@ -460,7 +483,7 @@ var _Renderer = function () {
             }
 
             try {
-                this.main.onUpdate(dt);
+                this.main.onUpdate(dt, tr);
             } catch (err) {
                 console.error(err);
             }
@@ -469,7 +492,7 @@ var _Renderer = function () {
         key: "clearCanvas",
         value: function clearCanvas() {
             var ctx = this.viewport.context;
-            ctx.clearRect(0, 0, this.viewport.width, 240);
+            ctx.clearRect(0, 0, this.viewport.width, 400);
         }
     }, {
         key: "drawText",
@@ -510,7 +533,7 @@ var _Renderer = function () {
         key: "drawSprite",
         value: function drawSprite(camera, sprite, loc, w, h) {
 
-            this.viewport.context.drawImage(sprite.img, sprite.x * sprite.resolution, sprite.y * sprite.resolution, sprite.resolution * sprite.width, sprite.resolution * sprite.height - 0.35, Math.round(loc.x + camera.x - w / 2), Math.round(loc.y * -1 + camera.y - h / 2), w, h);
+            this.viewport.context.drawImage(sprite.img, sprite.x, sprite.y, sprite.resolution * sprite.width, sprite.resolution * sprite.height, Math.round(loc.x + camera.x - w / 2), Math.round(loc.y * -1 + camera.y - h / 2), w, h);
         }
 
         // Setter
@@ -554,12 +577,12 @@ var Sprite = function () {
 
         _classCallCheck(this, Sprite);
 
-        this.x = a.x;
-        this.y = a.y;
+        this.resolution = a.res;
+        this.x = a.x * this.resolution;
+        this.y = a.y * this.resolution;
         this.width = a.width || 1;
         this.height = a.height || 1;
         this.type = a.type;
-        this.resolution = a.res;
 
         if (this.type == "ANIMATION") {
             this.animation = {
@@ -570,20 +593,19 @@ var Sprite = function () {
             };
         }
 
-        this.img = Assets.getSprite();
+        this.img = Assets.SPRITESHEET;
     }
 
     _createClass(Sprite, [{
         key: "animate",
         value: function animate(dt) {
-
             var anim = this.animation;
             anim.tickCounter += dt;
             var frameTick = 1 / anim.fps * 1000;
             if (anim.tickCounter >= frameTick) {
                 anim.tickCounter = 0;
                 anim.curframe++;
-                this.x = anim.frames[anim.curframe % anim.frames.length];
+                this.x = anim.frames[anim.curframe % anim.frames.length] * this.resolution;
             }
         }
     }]);

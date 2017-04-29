@@ -17,11 +17,31 @@ body {
 canvas {
 	width: 100%;
 }
-/*
-canvas[data-running="false"] {
-	filter: blur(2px);
+
+#HUD {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    -webkit-transform: none;
+    transition: -webkit-transform .5s;
 }
-*/
+
+#HUD.hidden {
+    -webkit-transform: translate(200%,0);
+}
+
+#HUD span {
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 3.5em;
+    position: absolute;
+    top: 52.5%;
+    right: 10px;
+}
+
 .main {
 	position: absolute;
 	width: 100%;
@@ -101,9 +121,9 @@ canvas[data-running="false"] {
     text-align: center;
 }
 
-.startScreen .wrapper .row .version::before {
-	content: "Version";
-	margin-right: 10px;
+.startScreen .wrapper .row .version.beta::before {
+	content: "Beta";
+	margin-right: 5px;
 }
 
 .container {
