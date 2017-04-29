@@ -17,14 +17,14 @@ var objects = (function(speed, blockSize, beginpuffer, base, origin, gravity, sc
 		this.height = h;
 
 		if(this.id > beginpuffer) {
-			var spaceing = score/1000000 * (11-6) + 6;  // spacing between walls
+			var spaceing = score/1000000 * (11-7) + 7;  // spacing between walls
 			var probability = score/1000000 * (1-0.3) + 0.3;  // from 0 to 1
 
-			var a = walls.length > 0 ? this.id - walls[walls.length-1].id > spaceing : false;
-			var b = Math.random() < probability;
-			var c = this.id < beginpuffer + 1;
+			var a = walls.length > 0 ? this.id - walls[walls.length-1].id > spaceing : false;   // during + b
+			var b = Math.random() < probability;    // during + a
+			var c = this.id < beginpuffer + 1;      // from start
 			var d = walls.length > 0 ? this.id - walls[walls.length-1].id > 20 : false;
-			var e = walls.length == 0;
+			var e = walls.length == 0;              // from start | first wall
 
 			if( a && b || c || d || e) {
 	            // var rank; // Max score guess
@@ -50,14 +50,13 @@ var objects = (function(speed, blockSize, beginpuffer, base, origin, gravity, sc
 	    }
 
 	    Block.prototype.overlap = function(player) {
-	        var res;
-			if ( player.location.x + (player.size/2) > this.x && player.location.x - (player.size/2) < this.x + this.width )
-				if( player.location.y - (player.size/2) < this.y && player.location.y + (player.size/2) > this.y + this.height )
+			let x = player.location.x + (player.size/2) > this.x && player.location.x - (player.size/2) < this.x + this.width;
+			let y = player.location.y - (player.size/2) < this.y && player.location.y + (player.size/2) > this.y + this.height;
+			if ( x )
+				if( y )
 					return true;
 			else
 				return false;
-
-	        return res;
 	    }
 
 	// Wall object

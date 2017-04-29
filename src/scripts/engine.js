@@ -1,35 +1,100 @@
-
 let game;
 
-let highscore, score, crashes;
+let score, highscore, crashes;
 
-/*window.onload = function() {
+var Input = new class _Input {
 
+    constructor() {
+		this._pressed = {};
+    }
 
-    game = new _Renderer({ 
-		width: window.innerWidth, 
-		height: window.innerHeight, 
-		class:"canvas", 
-		bgColor: "#000", 
-		vp: $("canvas") [0]
-	});
-	game.run();
+    onPress(e) {
+		this._pressed[key] = false;
+        this._pressed[key] = true;
+    }
 
-};*/
+	onClick(e) {
 
-class _Input {
+	}
+
+    bindKey(key, callback) {
+		if(this._pressed[key.toUpperCase()]) {
+            callback();
+        }
+    }
+
+}
+
+window.addEventListener("touchstart", Input.onClick, false);
+window.addEventListener("mousedown", Input.onClick, false);
+window.addEventListener("click", Input.onClick, false);
+
+class _Menu {
 
     constructor() {
 
+        this.domCach = $(".main");
+
+        this.startScreen = this.domCach.find(".startScreen")[0];
+        this.deadScreen = this.domCach.find(".deadScreen")[0];
+        this.unlocksScreen = this.domCach.find(".unlocksScreen")[0];
+        this.unlockslist = this.domCach.find(".unlocksScreen .unlockslist")[0];
+
+        this.startScreen.dataset.display = true;
+        this.unlocksScreen.dataset.display = false;
+        this.deadScreen.dataset.display = false;
+
+        this.bindEvents();
+        this.update();
+    }
+
+    update() {
+
+        getSaveValue("_highscore", function(hscore) {
+            if(hscore) {
+                highscore = hscore;
+            }
+        });
+
+        getSaveValue("_crashes", function(val) {
+            if(val) {
+                crashes = val;
+            }
+        });
+
+        this.domCach.find(".highscore")[1].innerHTML = highscore;
+        this.domCach.find(".crashes")[0].innerHTML = crashes;
 
     }
 
     bindEvents() {
-
+        this.domCach.find(".playBtn")[0].addEventListener("click", this.play.bind(this));
+        this.domCach.find(".unlocksBtn")[0].addEventListener("click", this.unlocks.bind(this));
+        this.domCach.find(".retry.Btn")[0].addEventListener("click", this.play.bind(this));
+        this.domCach.find(".back.Btn")[0].addEventListener("click", this.back.bind(this));
+        this.domCach.find(".back.Btn")[1].addEventListener("click", this.back.bind(this));
     }
 
-    keyPressed(key) {
-	
+    clear() {
+        this.startScreen.dataset.display = false;
+        this.unlocksScreen.dataset.display = false;
+        this.deadScreen.dataset.display = false;
+    }
+
+    play() {
+        this.clear();
+        game.run();
+    }
+
+    unlocks() {
+        this.startScreen.dataset.display = false;
+        this.unlocksScreen.dataset.display = true;
+        this.deadScreen.dataset.display = false;
+    }
+
+    back() {
+        this.clear();
+        this.startScreen.dataset.display = true;
     }
 
 }
@@ -131,7 +196,7 @@ class _Renderer {
         const updaterate = 1/128;
         let interval = 0;
         let framerate;
-		
+
         let loop = (curtick) => {
             if(lasttick) {
                 interval += (curtick - lasttick)/1000;
@@ -173,10 +238,10 @@ class _Renderer {
             this.viewport.width/2 + camera.location.x,
             this.viewport.height/2 + camera.location.y
         );
-		
+
 		let vprt = this.viewport;
         let ctx = vprt.context;
-		Uncut.render(ctx); 
+		Uncut.render(ctx);
 
         for( let i of Object.keys(this.renderGroups)) {
             let group = this.renderGroups[i];
@@ -400,7 +465,7 @@ class Player extends Entity {
         super(a);
         this.clickCounter = 0;
         this.airborn = true;
-        this.jumpPower = 800;
+        this.jumpPower = 700;
     }
 
     jump() {
@@ -412,17 +477,115 @@ class Player extends Entity {
     }
 
     onCollide() {
-        if(this.location.y <= 0 + this.attr.w/2) {
-            this.location.y = 0 + this.attr.w/2;
-            this.velocity.y = 0;
-            this.clickCounter = 0;
+        if (this.location.y < 0 + this.attr.r) {
             this.airborn = false;
+            this.clicked = 0;
+            this.clickCounter = 0;
+            this.location.y = 0 + this.attr.r;
         }
     }
 
     onAnimate() {
         if(this.airborn)
             this.sprite.x = 3;
+    }
+
+}
+
+class _Unlocks {
+
+    constructor() {
+        this.availableUnlocks = [];
+        this.activeUnlocks = [];
+        this.doneUnlocks = [];
+        this.shownUnlocks = 5;
+        this.cachedDom = $(".unlocksScreen");
+
+        this.update();
+    }
+
+    _renderUi() {
+        let unlocksList = this.cachedDom.find(".unlocksList")[0];
+        let doneunlocksList = this.cachedDom.find(".doneunlocksList")[0];
+        unlocksList.innerHTML = "";
+        for( let u in this.activeUnlocks ) {
+            var div = document.createElement("div");
+            div.className = "unlocksItem";
+            unlocksList.appendChild(div);
+            var title = document.createElement("span");
+            title.className = "title";
+            title.innerText = this.activeUnlocks[u].title;
+            div.appendChild(title);
+            var progress = document.createElement("span");
+            progress.className = "progress";
+            progress.innerText = this.activeUnlocks[u].progress + " / " + this.activeUnlocks[u].value;
+            div.appendChild(progress);
+        }
+        doneunlocksList.innerHTML = "";
+
+        for( let u in this.doneUnlocks ) {
+            var div = document.createElement("div");
+            div.className = "unlocksItem";
+            doneunlocksList.appendChild(div);
+            var title = document.createElement("span");
+            title.className = "title";
+            title.innerText = this.doneUnlocks[u].title;
+            div.style.opacity = 0.5;
+            div.appendChild(title);
+            var progress = document.createElement("span");
+            progress.className = "progress";
+            progress.innerText = this.doneUnlocks[u].description;
+            div.appendChild(progress);
+        }
+    }
+
+    update() {
+
+        // add unlock to active list
+        for(let i = this.availableUnlocks.length; i--;) {
+            this.setActive(this.availableUnlocks[i]);
+        }
+        for(let k = this.activeUnlocks.length; k--;) {
+            let o = this.activeUnlocks;
+            o[k].progress = o[k].aim;
+            if(o[k].value <= o[k].aim) {
+                try {
+                    o[k].f(o[k].effect);
+                } catch(err) {} finally {
+                    this.setDone(o[k]);
+                }
+            }
+        }
+
+        this._renderUi();
+    }
+
+    setActive(u) {
+        this.activeUnlocks.push(u);
+        this.availableUnlocks.splice(this.availableUnlocks.indexOf(u), 1);
+    }
+
+    setDone(u) {
+        this.doneUnlocks.push(u);
+        this.activeUnlocks.splice(this.activeUnlocks.indexOf(u), 1);
+    }
+
+    createUnlock(a) {
+        this.availableUnlocks.push( new Unlock(a) );
+        this.update();
+    }
+}
+
+class Unlock {
+
+    constructor(obj = { title: "none", target: 0, effect: null, f: null, dec: "none", aim: highscore }) {
+        this.title = obj.title;
+        this.value = obj.target;
+        this.progress = 0;
+        this.effect = obj.effect; // function
+        this.f = obj.f; // function
+        this.description = obj.desc ? obj.desc : "none";
+        this.aim = obj.aim;
     }
 
 }

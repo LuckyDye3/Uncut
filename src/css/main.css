@@ -10,6 +10,7 @@ body {
     font-family: sans-serif;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
     cursor: default;
 }
 /*
@@ -81,7 +82,7 @@ canvas[data-running="false"] {
 }
 
 .startScreen .wrapper {
-	height: 70%;
+	height: 80%;
 	width: 380px;
     box-sizing: border-box;
     padding: 0 10px;
@@ -96,9 +97,10 @@ canvas[data-running="false"] {
     flex-flow: column;
 }
 .startScreen .wrapper .row .version {
-	margin-top: -20px;
+    margin-top: -20px;
+    margin-left: 10px;
     font-size: 12px;
-    text-align: right;
+    text-align: left;
 }
 
 .startScreen .wrapper .row .version::before {

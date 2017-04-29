@@ -4,7 +4,7 @@
 // or localstorage on the browser
 function setSaveValue(key, value) {
     try {
-        Android.saveHighscore(key, value);
+        Android.setKeyValue(key, value);
     } catch(err) {
         if(localStorage) {
             localStorage.setItem(key, value);
@@ -17,7 +17,7 @@ function setSaveValue(key, value) {
 // get the saved value from setSaveValue();
 function getSaveValue(key, callback) {
     try {
-        var value = Android.Uncut.getHighscore(key);
+        var value = Android.getKeyValue(key);
         callback(value);
     } catch(err) {
         if(localStorage) {
@@ -26,9 +26,21 @@ function getSaveValue(key, callback) {
         } else {
             console.error("No save, or not able to save to storage!");
         }
-
     }
 }
+
+window.onload = function() {
+
+
+    game = new _Renderer({
+		width: window.innerWidth,
+		height: window.innerHeight,
+		class:"canvas",
+		bgColor: "#000",
+		vp: $("canvas") [0]
+	});
+
+};
 
 var Uncut = (function(){
 
@@ -59,19 +71,17 @@ var Uncut = (function(){
     var running = false;
     var obj;
 
-    var event = Events();
-    var unlocks = Unlocks();
-
-    function bindEvents() {
-        domCach.find(".playBtn")[0].addEventListener("click", play);
-        domCach.find(".unlocksBtn")[0].addEventListener("click", function() {
+    function bindEvents(event) {
+        domCach.find(".playBtn")[0].addEventListener(event, play);
+        domCach.find(".playBtn")[0].addEventListener(event, play);
+        domCach.find(".unlocksBtn")[0].addEventListener(event, function() {
             startScreen.dataset.display = false;
             unlocksScreen.dataset.display = true;
             unlocks.update();
         });
-        domCach.find(".retry.Btn")[0].addEventListener("click", play);
-        domCach.find(".back.Btn")[0].addEventListener("click", back);
-        domCach.find(".back.Btn")[1].addEventListener("click", back);
+        domCach.find(".retry.Btn")[0].addEventListener(event, play);
+        domCach.find(".back.Btn")[0].addEventListener(event, back);
+        domCach.find(".back.Btn")[1].addEventListener(event, back);
     }
 
     // back to the startscreen
@@ -93,20 +103,19 @@ var Uncut = (function(){
 
     function init() {
 
-        bindEvents();
-        initUnlocks();
-
         W = window.innerWidth;
         H = window.innerHeight;
 
         if(screen.width > 720) {
             W = 600;
+            bindEvents("click");
             document.addEventListener("mousedown", function() {
                 if(running) {
                     player.jump();
                 }
             }, false);
         } else {
+            bindEvents("touchstart");
             document.addEventListener("touchstart", function() {
                 if(running) {
                     player.jump();
@@ -159,16 +168,15 @@ var Uncut = (function(){
     	startScreen.dataset.display = false;
     	unlocksScreen.dataset.display = false;
 
+        game.run();
         running = true;
 
     	console.log("Running.");
     }
 
-    function render() {
+    function render(ctx) {
 
         if(running) {
-
-            background(0);
 
         	for( var i = renderList.length; i--; ) {
         	    if( renderList[i].x < origin.x - blockSize ) {
@@ -225,7 +233,7 @@ var Uncut = (function(){
     }
 
     function isRunning() {
-        return running;
+        return game.isRunning();
     }
 
     function getHighscore() {
@@ -253,7 +261,7 @@ var Uncut = (function(){
 
     // gets called when player dies
     function onDead(score) {
-        running = false;
+        game.pause();
         crashes++;
         if(highscore < score) {
     		highscore = score;
@@ -270,13 +278,13 @@ var Uncut = (function(){
         getCrashes: getCrashes,
         render: render,
         init: init,
-        isRunning: isRunning
+        isRunning: isRunning,
+        play: play
     };
 
 })();
 
 function setup() { Uncut.init(); }
-function draw() { Uncut.render(); }
 
 function random(z) {
 	return Math.floor((Math.random() * z) + 1);
