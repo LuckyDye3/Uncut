@@ -39,14 +39,13 @@ class _Menu {
 
         this.domCach = $(".main");
 
-        this.startScreen = this.domCach.find(".startScreen")[0];
-        this.deadScreen = this.domCach.find(".deadScreen")[0];
-        this.unlocksScreen = this.domCach.find(".unlocksScreen")[0];
-        this.unlockslist = this.domCach.find(".unlocksScreen .unlockslist")[0];
+        this.startScreen = this.domCach.find(".startScreen");
+        this.deadScreen = this.domCach.find(".deadScreen");
+        this.unlocksScreen = this.domCach.find(".unlocksScreen");
+        this.unlockslist = this.domCach.find(".unlocksScreen .unlockslist");
 
-        this.startScreen.dataset.display = true;
-        this.unlocksScreen.dataset.display = false;
-        this.deadScreen.dataset.display = false;
+        this.clear();
+        this.startScreen.removeClass("hidden");
 
         this.update();
         this.bindEvents();
@@ -84,9 +83,9 @@ class _Menu {
     }
 
     clear() {
-        this.startScreen.dataset.display = false;
-        this.unlocksScreen.dataset.display = false;
-        this.deadScreen.dataset.display = false;
+        this.startScreen.addClass("hidden");
+        this.unlocksScreen.addClass("hidden");
+        this.deadScreen.addClass("hidden");
     }
 
     play() {
@@ -96,9 +95,9 @@ class _Menu {
 
     unlocks() {
         this.main.Unlocks.update();
-        this.startScreen.dataset.display = false;
-        this.unlocksScreen.dataset.display = true;
-        this.deadScreen.dataset.display = false;
+        this.startScreen.removeClass("hidden");
+        this.unlocksScreen.addClass("hidden");
+        this.deadScreen.removeClass("hidden");
     }
 
     back() {
@@ -106,12 +105,12 @@ class _Menu {
         this.getGameData(this.main);
         this.update();
         this.clear();
-        this.startScreen.dataset.display = true;
+        this.startScreen.removeClass("hidden");
     }
 
     gameover() {
         this.clear();
-        this.deadScreen.dataset.display = true
+        this.deadScreen.removeClass("hidden");
     }
 
 }
@@ -201,7 +200,7 @@ class _Renderer {
 
     createCanvas(w, h, c) {
         let canvas;
-        let tempCanvas = document.getElementsByTagName("canvas");
+        let tempCanvas = $(".canvas");
         if(tempCanvas.length == 0) {
             canvas = document.createElement("canvas");
             canvas.className = c;
@@ -252,6 +251,12 @@ class _Renderer {
 
     pause() {
         this.running = false;
+    }
+
+    resume() {
+        if(!this.running) {
+            this.run();
+        }
     }
 
     draw(camera = { location: new Location(0,0) }) {
@@ -328,9 +333,7 @@ class _Renderer {
 
     clearCanvas() {
         let ctx = this.viewport.context;
-        ctx.fillStyle = this.viewport.bgColor;
-        ctx.fillRect(0, this.viewport.height/4, this.viewport.width, this.viewport.height/2);
-        ctx.fill();
+        ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
     }
 
     drawText(camera, size, text, x, y) {

@@ -1,7 +1,4 @@
-let game;
-
-//require("./js/src/assets.js");
-//require("./js/src/engien.js");
+var game;
 
 window.onload = function() {
     game = new Main();
@@ -40,13 +37,14 @@ class Main {
 
         this.initScene();
 
-        this.Unlocks.createUnlock({
-            title: "Get a highscore of 5000",
-            target: 5000,
-            f() { this.setCurrentSkin(Assets.skins[1]) },
-            desc: "Animation!",
-            aim: this.getHighscore.bind(this)
-        });
+        //Unlock
+        //this.Unlocks.createUnlock({
+        //    title: "Get a highscore of 5000",
+        //    target: 5000,
+        //    f() { this.setCurrentSkin(Assets.skins[1]) },
+        //    desc: "Animation!",
+        //    aim: this.getHighscore.bind(this)
+        //});
 
     }
 
@@ -81,16 +79,19 @@ class Main {
     }
 
     run() {
-
         // game logic
         console.log("Running.");
-
         this.Renderer.run();
     }
 
     pause() {
         console.log("Paused.");
         this.Renderer.pause();
+    }
+
+    resume() {
+        console.log("Resuming.");
+        this.Renderer.resume();
     }
 
     reset() {
@@ -148,17 +149,16 @@ class Main {
     	}
 
         this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width/80, 60);
-        this.Renderer.drawText(this.camera, 25, this.highscore.toString(), this.width - this.width/80, 60 + 23);
 
-        this.camera.location.x -= 3;
-        this.player.location.x += 3;
+        //this.camera.location.x -= 3;
+        //this.player.location.x += 3;
     }
 
     onUpdate(dt) {
         // on update
         this.score += 1;
-        //this.camera.location.x -= 190 * dt;
-        //this.player.location.x += 190 * dt;
+        this.camera.location.x -= 190 * dt;
+        this.player.location.x += 190 * dt;
     }
 
     gameOver() {
@@ -179,7 +179,7 @@ class Main {
     }
 
     getCrashes() {
-
+        return this.crashes;
     }
 
     getCurentSkin() {

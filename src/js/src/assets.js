@@ -33,8 +33,7 @@ let Assets = new class _Assets {
         ];
 
         this.skins = [
-            { x: 0, y: 1, res: 128, type: "ANIMATION", frames: [0, 1, 2, 3], fps: 15 },
-            { x: 0, y: 0, res: 128, type: "ANIMATION", frames: [0, 1, 2, 3], fps: 25 }
+            { x: 0, y: 0, res: 128, type: "STATIC", frames: [0, 1, 2, 3], fps: 25 }
         ];
 
     }
