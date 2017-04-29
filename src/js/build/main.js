@@ -174,20 +174,6 @@ var Main = function () {
             var id = void 0;
             if (this.ground.length < 1 || this.ground[0].location.x + this.camera.location.x < this.width / 2) {
                 id = this.lastId++;
-
-                var btemp = new Block({
-                    x: bs * id,
-                    y: -bs / 2,
-                    w: bs,
-                    h: bs
-                }).sprite({
-                    x: 0,
-                    y: 1,
-                    res: 128,
-                    type: "STATIC"
-                });
-                this.ground.unshift(btemp);
-
                 if (id > w) {
 
                     var rg = this.Renderer.renderGroups.walls.elements;
@@ -204,10 +190,6 @@ var Main = function () {
                         new Structure(bs, id, _rg);
                     }
                 }
-            }
-
-            if (this.ground[this.ground.length - 1].location.x + this.camera.location.x < -this.width / 2 - 20) {
-                this.ground.pop(this.ground.length - 1, 1);
             }
 
             var step = 6 / tr || 0.6;

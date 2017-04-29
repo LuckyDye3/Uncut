@@ -361,6 +361,9 @@ var _Renderer = function () {
             // make camera relative to the canvas center
             var origin = new Location(this.viewport.width / 2 + camera.location.x, this.viewport.height / 2 + camera.location.y);
 
+            this.viewport.context.fillStyle = "#fff";
+            this.viewport.context.fillRect(0, this.viewport.height / 2, this.viewport.width, 30);
+
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
