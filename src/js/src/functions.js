@@ -5,6 +5,7 @@ function setSaveValue(key, value) {
     try {
         Android.setKeyValue(key, value);
     } catch(err) {
+        console.error(err);
         if(localStorage) {
             localStorage.setItem(key, value);
         } else {

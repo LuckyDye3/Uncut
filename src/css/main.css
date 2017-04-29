@@ -13,12 +13,11 @@ body {
     -webkit-user-select: none;
     cursor: default;
 }
-/*
-canvas {
-	filter: none;
-	transition: filter .2s;
-}
 
+canvas {
+	width: 100%;
+}
+/*
 canvas[data-running="false"] {
 	filter: blur(2px);
 }
@@ -29,6 +28,9 @@ canvas[data-running="false"] {
 	height: 100%;
 	max-width: 600px;
 	overflow: hidden;
+	display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
 }
 
 .main-header {
@@ -59,48 +61,40 @@ canvas[data-running="false"] {
 }
 
 .startScreen .playBtn, .startScreen .unlocksBtn {
-	width: 360px;
-	margin-top: 50px;
-	background: white;
-	color: black;
-	border: none;
+	margin-bottom: 50px;
 	font-size: 3em;
 	cursor: pointer;
-	outline: none;
 	text-align: center;
-	line-height: 90px;
-	font-weight: bold;
-}
-
-.startScreen .playBtn:hover, .startScreen .unlocksBtn:hover {
-    background: #cacaca;
+	width: 2em;
+	height: 2em;
 }
 
 .startScreen .title {
-    font-size: 8em;
+    font-size: 620%;
     margin: 0;
+    text-align: center;
 }
 
 .startScreen .wrapper {
 	height: 80%;
-	width: 380px;
-    box-sizing: border-box;
-    padding: 0 10px;
-    display: flex;
-    flex-flow: column;
-    justify-content: space-between;
+	width: 95%;
+	max-width: 400px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	display: flex;
+	flex-flow: column;
+	justify-content: space-between;
 }
 
 .startScreen .wrapper .row {
 	text-align: left;
 	display: flex;
-    flex-flow: column;
+	flex-flow: column;
 }
 .startScreen .wrapper .row .version {
     margin-top: -20px;
-    margin-left: 10px;
     font-size: 12px;
-    text-align: left;
+    text-align: center;
 }
 
 .startScreen .wrapper .row .version::before {
@@ -110,8 +104,10 @@ canvas[data-running="false"] {
 
 .container {
 	width: 100%;
-    font-size: 1.5em;
-	margin-top: 20px;
+	font-size: 1.5em;
+	margin-bottom: 20px;
+	display: flex;
+	flex-flow: column nowrap;
 }
 
 .main .wrapper {
@@ -145,11 +141,10 @@ canvas[data-running="false"] {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
-    padding: 60px 8%;
+    padding: 40px 8%;
     box-sizing: border-box;
-
-	transform: none;
-	transition: transform .2s;
+    transform: none;
+    transition: transform .2s;
 }
 
 .deadscreen .score {
@@ -161,20 +156,19 @@ canvas[data-running="false"] {
 }
 
 .deadScreen .wrapper {
-	width: 200px;
-	height: 270px;
+	width: 180px;
 }
 
 .deadScreen .retry.Btn {
-	width: 200px;
-    height: 150px;
-    margin-top: 30px;
+	width: 100%;
+	height: 130px;
+	margin-top: 30px;
 	text-align: center;
 }
 
 .deadScreen .retry.Btn svg {
 	height: 100%;
-    fill: white;
+	fill: white;
 	transform-origin: 50% 54%;
 	transform: none;
 	transition: transform .1s;
@@ -280,4 +274,12 @@ canvas[data-running="false"] {
 	font-size: 25px;
 	display: block;
 	margin-bottom: 5px;
+}
+
+.row.int {
+    flex-flow: row nowrap !important;
+}
+
+.startScreen .buttons div:last-child {
+    margin: 0;
 }

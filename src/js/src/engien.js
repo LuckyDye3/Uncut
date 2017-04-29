@@ -1,12 +1,15 @@
 
 class _Input {
 
-    constructor() {
+    constructor(main) {
 		this._pressed = {};
+        this.main = main;
 
-        window.addEventListener("touchstart", this.onClick, false);
-        window.addEventListener("mousedown", this.onClick, false);
-        window.addEventListener("click", this.onClick, false);
+        if(screen.width > 1024) {
+            document.addEventListener("mousedown", this.onClick.bind(this), false);
+        } else {
+            document.addEventListener("touchstart", this.onClick.bind(this), false);
+        }
 
     }
 
@@ -16,7 +19,8 @@ class _Input {
     }
 
 	onClick(e) {
-
+        let jump = this.main.player.jump.bind(this.main.player);
+        jump();
 	}
 
     bindKey(key, callback) {
@@ -33,9 +37,6 @@ class _Menu {
 
         this.main = main;
 
-        this.highscore = 0;
-        this.crashes = 0;
-
         this.domCach = $(".main");
 
         this.startScreen = this.domCach.find(".startScreen")[0];
@@ -47,8 +48,8 @@ class _Menu {
         this.unlocksScreen.dataset.display = false;
         this.deadScreen.dataset.display = false;
 
-        this.bindEvents();
         this.update();
+        this.bindEvents();
     }
 
     update() {
@@ -94,13 +95,16 @@ class _Menu {
     }
 
     unlocks() {
+        this.main.Unlocks.update();
         this.startScreen.dataset.display = false;
         this.unlocksScreen.dataset.display = true;
         this.deadScreen.dataset.display = false;
     }
 
     back() {
+        this.main.pause();
         this.getGameData(this.main);
+        this.update();
         this.clear();
         this.startScreen.dataset.display = true;
     }
@@ -203,7 +207,7 @@ class _Renderer {
             canvas.className = c;
             canvas.width = w;
             canvas.height = h;
-            document.body.appendChild(canvas);
+            document.body.getElementsByTagName("div")[0].appendChild(canvas);
         } else {
             canvas = tempCanvas[0];
         }
@@ -213,18 +217,21 @@ class _Renderer {
     run() {
 
         let lasttick;
-        const updaterate = 1/128;
+        const updaterate = 1/508;
         let interval = 0;
-        let framerate;
 
         let loop = (curtick) => {
+
             if(lasttick) {
                 interval += (curtick - lasttick)/1000;
-                this.input();
                 while(interval > updaterate) {
-                    this.update(updaterate);
-                    this.tickrate = (curtick - lasttick);
-                    interval -= updaterate;
+                    if(this.running) {
+                        this.tickrate = (curtick - lasttick);
+                        interval -= updaterate;
+                        this.update(updaterate, this.tickrate);
+                    } else {
+                        break;
+                    }
                 }
                 this.draw(this.camera);
             }
@@ -247,10 +254,6 @@ class _Renderer {
         this.running = false;
     }
 
-    input() {
-        // TODO: check input from Input class, pressed keys n stuff
-    }
-
     draw(camera = { location: new Location(0,0) }) {
         this.clearCanvas();
         // make camera relative to the canvas center
@@ -258,48 +261,52 @@ class _Renderer {
             this.viewport.width/2 + camera.location.x,
             this.viewport.height/2 + camera.location.y
         );
-
+        let count = 0;
         for( let i of Object.keys(this.renderGroups)) {
             let group = this.renderGroups[i];
             if(group.render) {
                 for( let e of group.elements ) {
-                    switch(e.type) {
-                        case "SPRITE":
-                            this.drawSprite(
-                                origin,
-                                e.sprite,
-                                e.location,
-                                e.attr.w,
-                                e.attr.h
-                            );
-                            break;
-                        case "CIRCLE":
-                            this.drawArc(
-                                origin,
-                                e.location,
-                                e.attr.r,
-                                e.attr.color
-                            );
-                            break;
-                            break;
-                        case "RECT":
-                            this.drawRect(
-                                origin,
-                                e.location,
-                                e.attr.w,
-                                e.attr.h,
-                                e.color,
-                                e.stroke
-                            );
-                            break;
+                    if( -e.location.x < this.camera.location.x + this.viewport.width/2 + 30 &&
+                        -e.location.x > this.camera.location.x - this.viewport.width/2 - 30) {
+                        count++;
+                        switch(e.type) {
+                            case "SPRITE":
+                                this.drawSprite(
+                                    origin,
+                                    e.sprite,
+                                    e.location,
+                                    e.attr.w,
+                                    e.attr.h
+                                );
+                                break;
+                            case "CIRCLE":
+                                this.drawArc(
+                                    origin,
+                                    e.location,
+                                    e.attr.r,
+                                    e.attr.color
+                                );
+                                break;
+                                break;
+                            case "RECT":
+                                this.drawRect(
+                                    origin,
+                                    e.location,
+                                    e.attr.w,
+                                    e.attr.h,
+                                    e.color,
+                                    e.stroke
+                                );
+                                break;
+                        }
+                        try {
+                            e.onDraw(this.tickrate);
+                        } catch (e) { }
                     }
-                    try {
-                        e.onDraw(this.tickrate);
-                    } catch (e) { }
                 }
+                //console.log(count); //count of objects on screen
             }
         }
-
         try {
             this.main.onRender();
         } catch(err) { console.error(err); }
@@ -320,25 +327,24 @@ class _Renderer {
     }
 
     clearCanvas() {
-        let vprt = this.viewport;
-        let ctx = vprt.context;
-        ctx.beginPath();
-        ctx.rect(0, 0, vprt.width, vprt.height);
-        ctx.fillStyle = vprt.bgColor;
+        let ctx = this.viewport.context;
+        ctx.fillStyle = this.viewport.bgColor;
+        ctx.fillRect(0, this.viewport.height/4, this.viewport.width, this.viewport.height/2);
         ctx.fill();
-        ctx.closePath();
     }
 
     drawText(camera, size, text, x, y) {
         // size in px
         this.viewport.context.textAlign = "right";
         this.viewport.context.font = 'bold ' + size + 'px sans-serif';
-        this.viewport.context.fillText(text, x, y + window.innerHeight/2);
+        this.viewport.context.fillText(text, x, y + this.viewport.height/2);
     }
 
     drawRect(camera, loc, w, h, color = "#fff", s) {
         this.viewport.context.beginPath();
-        this.viewport.context.rect(loc.x + camera.x - w/2, loc.y * -1 + camera.y - h/2, w, h);
+        let x = loc.x + camera.x - w/2;
+        let y = loc.y * -1 + camera.y - h/2;
+        this.viewport.context.rect(Math.floor(x), Math.floor(y), w, h);
         if(s) {
             this.viewport.context.strokeStyle = "black";
             this.viewport.context.stroke();
@@ -349,11 +355,11 @@ class _Renderer {
     }
 
     drawArc(camera, loc, r, color = "#fff") {
-        this.viewport.context.beginPath();
-        this.viewport.context.arc(loc.x + camera.x, loc.y * -1 + camera.y, r, 0, 2*Math.PI);
+        let x = loc.x + camera.x;
+        let y = loc.y * -1 + camera.y;
+        this.viewport.context.arc(x, y, r, 0, 2*Math.PI);
         this.viewport.context.fillStyle = color;
         this.viewport.context.fill();
-        this.viewport.context.closePath();
     }
 
     drawSprite(camera, sprite, loc, w, h) {
@@ -388,14 +394,14 @@ class _Renderer {
 
 class Sprite {
 
-    constructor(a = { x: 0, y: 0, width: 1, height: 1, type: "STATIC", frames: [], fps: 30 }) {
+    constructor(a = { x: 0, y: 0, res: 64, width: 1, height: 1, type: "STATIC", frames: [], fps: 30 }) {
 
         this.x = a.x;
         this.y = a.y;
         this.width = a.width || 1;
         this.height = a.height || 1;
         this.type = a.type;
-        this.resolution = 64;
+        this.resolution = a.res;
 
         if(this.type == "ANIMATION") {
             this.animation = {
@@ -406,8 +412,7 @@ class Sprite {
             }
         }
 
-        this.img = new Image();
-        this.src = this.img.src = 'sprites/Sprites.png';
+        this.img = Assets.getSprite();
 
     }
 
@@ -467,9 +472,12 @@ class Entity {
                 this.onAnimate();
             } catch (e) { }
         }
+        try {
+            this.onRender();
+        } catch(err) {  }
     }
 
-    update(dt) {
+    update(dt, tr) {
         if(this.attr.rigid)
             this.simulate(dt);
         if(this.attr.collider)
@@ -477,7 +485,7 @@ class Entity {
     }
 
     simulate(dt) {
-        let mass = 2;
+        let mass = 1;
         this.velocity.y += this.force.y + this.gravity * mass;
         this.velocity.x += this.force.x;
 
@@ -552,8 +560,9 @@ class _Unlocks {
         }
         for(let k = this.activeUnlocks.length; k--;) {
             let o = this.activeUnlocks;
-            o[k].progress = o[k].aim;
-            if(o[k].value <= o[k].aim) {
+            let aim = parseInt(o[k].aim());
+            o[k].progress = aim;
+            if(o[k].value <= aim) {
                 try {
                     let func = o[k].f.bind(this.main);
                     func();

@@ -3,8 +3,9 @@
     <head>
     	<script src="libs/jquery.js"></script>
 
-        <script src="js/functions.js"></script>
-        <script src="js/engien.js"></script>
+		<script src="js/src/functions.js"></script>
+        <script src="js/src/assets.js"></script>
+        <script src="js/src/engien.js"></script>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
@@ -58,20 +59,40 @@
 				<div class="wrapper">
 					<div class="row">
 						<h1 class="title">Uncut</h1>
-						<a class="version">0.2.0</a>
+						<a class="version">0.2.2</a>
 					</div>
-					<div class="row">
-						<div class="playBtn">Play</div>
-						<div class="unlocksBtn">Unlocks</div>
-						<span class="container"><a>Highscore: </a><a class="highscore"></a></span>
-						<span class="container"><a>Crashes: </a><a class="crashes"></a></span>
-						<div class="unlocksBtn" style="display:none">Unlocks</div>
+					<div class="row int">
+						<div class="stats">
+							<span class="container"><a>Highscore: </a><a class="highscore"></a></span>
+							<span class="container"><a>Crashes: </a><a class="crashes"></a></span>
+						</div>
+						<div class="buttons">
+							<div class="unlocksBtn">
+								<svg version="1.1" x="0px" y="0px" height="100%" viewBox="0 0 188 188" style="overflow:scroll;enable-background:new 0 0 188 188;">
+									<style type="text/css"> .st0{fill:#FFFFFF;} .st1{fill:#333333;} </style>
+									<circle class="st0" cx="94" cy="94" r="94"/>
+									<path class="st1" d="M123.3,88.4H77V66c0-9.6,7.8-17.4,17.4-17.4s17.4,7.8,17.4,17.4v11.3h11.4V65.8c0-15.9-12.9-28.8-28.8-28.8
+									S65.6,49.9,65.6,65.8v22.5c-4.2,0-7.6,3.4-7.6,7.7v47.8c0,4.2,3.4,7.7,7.7,7.7h57.6c4.2,0,7.7-3.4,7.7-7.7V96
+									C130.9,91.8,127.5,88.4,123.3,88.4z"/>
+								</svg>
+							</div>
+
+							<div class="playBtn">
+								<svg version="1.1" x="0px" y="0px" height="100%" viewBox="0 0 188 188" style="overflow:scroll;enable-background:new 0 0 188 188;">
+									<style type="text/css">.st0{fill:#FFFFFF;} .st1{fill:#333333;}</style>
+									<circle class="st0" cx="94" cy="94" r="94"/>
+									<polygon class="st1" points="62.7,151.3 62.7,36.7 144,94 "/>
+									<path class="st1" d="M66.7,86.2"/>
+								</svg>
+							</div>
+
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<script src="./js/game/main.js"></script>
+		<script src="./js/src/main.js"></script>
     </body>
 
 </html>

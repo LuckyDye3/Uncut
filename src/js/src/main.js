@@ -1,48 +1,7 @@
 let game;
 
-let Assets = new class _Assets {
-
-    constructor() {
-
-        this.parts = [
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,1,0],[0,1,1,1]],"rank":3000},
-            {"data":[[0,0,0,0],[0,0,1,0],[0,1,1,0],[1,1,1,0]],"rank":6000},
-            {"data":[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,1,1,0]],"rank":1000},
-            {"data":[[0,0,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],"rank":500},
-            {"data":[[1,0,0,0],[0,0,0,0],[0,0,0,1],[0,0,0,1]],"rank":3000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,1,1]],"rank":0},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,0,0,0]],"rank":0},
-            {"data":[[0,0,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],"rank":1000},
-            {"data":[[0,0,0,0],[0,0,0,0],[1,0,0,0],[0,0,0,1]],"rank":10000},
-            {"data":[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]],"rank":0},
-            {"data":[[0,0,0,0],[0,0,0,1],[0,0,0,0],[1,0,0,0]],"rank":1000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,0,1,0],[1,1,1,0]],"rank":1000},
-            {"data":[[0,0,1,0],[0,0,0,0],[1,0,0,0],[1,0,0,0]],"rank":2000},
-            {"data":[[0,0,0,0],[0,0,0,0],[1,1,0,1],[0,0,0,0]],"rank":0},
-            {"data":[[1,1,0,0],[1,1,0,0],[1,1,0,0],[1,1,0,0]],"rank":10000},
-            {"data":[[0,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0]],"rank":3000},
-            {"data":[[0,0,0,0],[0,0,0,0],[1,1,0,0],[1,1,0,0]],"rank":0},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,1,0,0]],"rank":10000000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,0,1,0],[0,1,1,1]],"rank":50000},
-            {"data":[[0,0,0,0],[0,1,0,0],[0,1,1,0],[0,1,1,0]],"rank":50000},
-            {"data":[[0,0,0,0],[0,0,1,0],[0,1,1,0],[0,1,1,0]],"rank":50000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,1,0],[1,1,1,1]],"rank":50000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,0,0],[0,1,0,0]],"rank":500},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,1,0],[0,1,1,0]],"rank":5000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,0,0],[1,1,0,0]],"rank":50000},
-            {"data":[[0,0,0,0],[0,0,0,0],[0,1,1,0],[1,1,1,0]],"rank":0},
-            {"data":[[0,0,0,0],[1,0,0,0],[0,0,0,1],[0,0,0,1]],"rank":50000},
-            {"data":[[0,0,0,0],[0,0,0,1],[1,0,0,1],[1,0,0,0]],"rank":30000}
-        ];
-
-        this.skins = [
-            { x: 0, y: 0, type: "ANIMATION", frames: [0, 1, 2, 3], fps: 25 },
-            { x: 0, y: 0, width: 1, height: 1, type: "STATIC" },
-        ];
-
-    }
-
-}
+//require("./js/src/assets.js");
+//require("./js/src/engien.js");
 
 window.onload = function() {
     game = new Main();
@@ -56,18 +15,20 @@ class Main {
 
         this.ground = [];
 
+        this.highscore = 0;
+        this.crashes = 0;
+
         this.playerSkin = Assets.skins[0];
 
         this.init();
     }
 
     init() {
-        this.highscore = 0;
-        this.crashes = 0;
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
-        this.blockSize = 20;
+
+        this.blockSize = 18;
 
         if(screen.width > 720) {
             this.width = 600;
@@ -75,16 +36,16 @@ class Main {
 
         this.Menu = new _Menu(this);
         this.Unlocks = new _Unlocks(this);
-        this.Input = new _Input();
+        this.Input = new _Input(this);
 
         this.initScene();
 
         this.Unlocks.createUnlock({
-            title: "Get a highscore of 10000",
-            target: 10000,
-            f() { this.setCurrentSkin(Assets.skins[0]) },
+            title: "Get a highscore of 5000",
+            target: 5000,
+            f() { this.setCurrentSkin(Assets.skins[1]) },
             desc: "Animation!",
-            aim: this.highscore
+            aim: this.getHighscore.bind(this)
         });
 
     }
@@ -108,17 +69,15 @@ class Main {
         this.Renderer.addRenderGroup("walls");
 
         this.player = new Player({
-            x: 200,
+            x: this.width/3,
             y: 0,
-            r: 10,
-            w: 20,
-            h: 20,
+            r: this.blockSize/2,
+            w: this.blockSize,
+            h: this.blockSize,
             rigid: true,
             collider: true
         }).sprite(this.getCurentSkin());
         this.Renderer.addToRenderGroup("player", this.player);
-
-        document.addEventListener("mousedown", this.player.jump.bind(this.player));
     }
 
     run() {
@@ -149,6 +108,13 @@ class Main {
         for( let i = this.ground.length; i--; ) {
     	    if( -this.ground[i].location.x < this.camera.location.x ) {
     	        this.ground.splice( this.ground[this.ground.indexOf(this.ground[i])], 1 );
+    	    }
+    	}
+
+        let rge = this.Renderer.getRenderGroup("walls").elements;
+    	for( let i in rge ) {
+    	    if(-rge[i].location.x - this.width/2 > this.camera.location.x) {
+                rge.splice(i, 1);
     	    }
     	}
 
@@ -191,6 +157,8 @@ class Main {
     onUpdate(dt) {
         // on update
         this.score += 1;
+        //this.camera.location.x -= 190 * dt;
+        //this.player.location.x += 190 * dt;
     }
 
     gameOver() {
@@ -204,6 +172,14 @@ class Main {
         this.Menu.gameover();
     	$(".score")[0].innerText = this.score;
     	$(".highscore")[0].innerText = this.highscore;
+    }
+
+    getHighscore() {
+        return this.highscore;
+    }
+
+    getCrashes() {
+
     }
 
     getCurentSkin() {
@@ -222,7 +198,10 @@ class Player extends Entity {
         super(a);
         this.clickCounter = 0;
         this.airborn = true;
-        this.jumpPower = 700;
+        this.jumpPower = 650;
+        this.gravity = -9.81/2;
+
+        this.history = [];
     }
 
     jump() {
@@ -244,6 +223,23 @@ class Player extends Entity {
     onAnimate() {
         if(this.airborn)
             this.sprite.x = 4;
+    }
+
+    onRender() {
+        this.keepHistory();
+    }
+
+    keepHistory() {
+        this.history.unshift({
+            r: this.attr.r,
+            x: this.location.x,
+            y: this.location.y,
+            w: this.attr.w,
+            h: this.attr.h
+        });
+        if(this.history.length > 4) {
+            this.history.pop();
+        }
     }
 
 }
