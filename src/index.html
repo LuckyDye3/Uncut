@@ -1,21 +1,18 @@
 <html>
 
-	<head>
+    <head>
+    	<script src="libs/jquery.js"></script>
 
-		<link type="text/css" rel="stylesheet" href="./css/main.css">
+        <script src="js/functions.js"></script>
+        <script src="js/engien.js"></script>
 
-		<script src="./scripts/jquery.js"></script>
-		<script src="./scripts/p5.js"></script>
-		<script src="./scripts/parts.js"></script>
-		<script src="./scripts/engine.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-		<meta content='width=device-width, initial-scale=1.0, user-scalable=0' name='viewport' />
+        <link type="text/css" rel="stylesheet" href="css/main.css">
+    </head>
 
-	</head>
-
-	<body>
-
-		<div class="main">
+    <body>
+        <div class="main">
             <div class="deadScreen" data-display="false">
 				<div class="wrapper">
 					<div class="stats">
@@ -61,10 +58,11 @@
 				<div class="wrapper">
 					<div class="row">
 						<h1 class="title">Uncut</h1>
-						<a class="version">0.1.95</a>
+						<a class="version">0.2.0</a>
 					</div>
 					<div class="row">
 						<div class="playBtn">Play</div>
+						<div class="unlocksBtn">Unlocks</div>
 						<span class="container"><a>Highscore: </a><a class="highscore"></a></span>
 						<span class="container"><a>Crashes: </a><a class="crashes"></a></span>
 						<div class="unlocksBtn" style="display:none">Unlocks</div>
@@ -73,8 +71,7 @@
 			</div>
 		</div>
 
-		<script src="./scripts/objects.js"></script>
-		<script src="./scripts/main.js"></script>
-	</body>
+		<script src="./js/game/main.js"></script>
+    </body>
 
 </html>

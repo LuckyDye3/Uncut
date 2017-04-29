@@ -273,6 +273,7 @@ canvas[data-running="false"] {
 	padding: 15px;
 	box-sizing: border-box;
 	margin-bottom: 20px;
+    border-radius: 10px;
 }
 
 .unlocksItem .title {
