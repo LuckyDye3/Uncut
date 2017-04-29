@@ -28,6 +28,7 @@ var Main = function () {
         this.width = 0;
         this.height = 0;
 
+        this.totalscore = 0;
         this.highscore = 0;
         this.crashes = 0;
 
@@ -170,9 +171,9 @@ var Main = function () {
                 this.lastId = 0;
             }
 
+            var id = void 0;
             if (this.ground.length < 1 || this.ground[0].location.x + this.camera.location.x < this.width / 2) {
-
-                var id = this.lastId++;
+                id = this.lastId++;
 
                 var btemp = new Block({
                     x: bs * id,
@@ -205,9 +206,8 @@ var Main = function () {
                 }
             }
 
-            var lastItem = this.ground.length - 1;
-            if (this.ground[lastItem].location.x + this.camera.location.x < -this.width / 2 - 20) {
-                this.ground.pop(lastItem, 1);
+            if (this.ground[this.ground.length - 1].location.x + this.camera.location.x < -this.width / 2 - 20) {
+                this.ground.pop(this.ground.length - 1, 1);
             }
 
             var step = 6 / tr || 0.6;
@@ -221,11 +221,13 @@ var Main = function () {
             this.pause();
             this.crashes++;
             var score = this.score + 1;
+            this.totalscore += parseInt(score);
             if (this.highscore < score) {
                 this.highscore = score;
             }
             setSaveValue("_crashes", this.crashes);
             setSaveValue("_highscore", this.highscore);
+            setSaveValue("_totalscore", this.totalscore);
             this.Menu.gameover();
             $(".score")[0].innerText = score;
             $(".highscore")[0].innerText = this.highscore;
@@ -239,6 +241,11 @@ var Main = function () {
         key: "getCrashes",
         value: function getCrashes() {
             return this.crashes;
+        }
+    }, {
+        key: "getTotalscore",
+        value: function getTotalscore() {
+            return this.totalscore;
         }
     }, {
         key: "getCurentSkin",
@@ -278,22 +285,28 @@ var Player = function (_Entity) {
             if (!this.airborn || this.clickCounter < 2) {
                 this.velocity.y = this.jumpPower;
                 this.clickCounter++;
-                this.airborn = true;
+                this.setAirborn(true);
             }
         }
     }, {
         key: "onCollide",
         value: function onCollide() {
             if (this.location.y <= 0 + this.attr.r) {
-                this.airborn = false;
+                this.setAirborn(false);
                 this.clickCounter = 0;
                 this.location.y = 0 + this.attr.r;
             }
         }
     }, {
+        key: "setAirborn",
+        value: function setAirborn(boolean) {
+            this.sprite.setPauseAnimation(boolean);
+            this.airborn = boolean;
+        }
+    }, {
         key: "onAnimate",
         value: function onAnimate() {
-            if (this.airborn) this.sprite.x = 0;
+            // after every animation frame
         }
     }, {
         key: "keepHistory",

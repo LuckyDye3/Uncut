@@ -99,6 +99,12 @@ var _Menu = function () {
                     b.crashes = val;
                 }
             });
+
+            getSaveValue("_totalscore", function (val) {
+                if (val) {
+                    b.totalscore = parseInt(val);
+                }
+            });
         }
     }, {
         key: "bindEvents",
@@ -573,7 +579,7 @@ var _Renderer = function () {
 
 var Sprite = function () {
     function Sprite() {
-        var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { x: 0, y: 0, res: 64, width: 1, height: 1, type: "STATIC", frames: [], fps: 30 };
+        var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { x: 0, y: 0, res: 64, width: 1, height: 1, type: "STATIC", frames: [], fps: 30, jumpSprite: false };
 
         _classCallCheck(this, Sprite);
 
@@ -583,6 +589,8 @@ var Sprite = function () {
         this.width = a.width || 1;
         this.height = a.height || 1;
         this.type = a.type;
+        this.animPaused = false;
+        this.jumpSprite = a.jumpSprite;
 
         if (this.type == "ANIMATION") {
             this.animation = {
@@ -599,14 +607,28 @@ var Sprite = function () {
     _createClass(Sprite, [{
         key: "animate",
         value: function animate(dt) {
-            var anim = this.animation;
-            anim.tickCounter += dt;
-            var frameTick = 1 / anim.fps * 1000;
-            if (anim.tickCounter >= frameTick) {
-                anim.tickCounter = 0;
-                anim.curframe++;
-                this.x = anim.frames[anim.curframe % anim.frames.length] * this.resolution;
+            if (!this.animPaused) {
+                var anim = this.animation;
+                anim.tickCounter += dt;
+                var frameTick = 1 / anim.fps * 1000;
+                if (anim.tickCounter >= frameTick) {
+                    anim.tickCounter = 0;
+                    anim.curframe++;
+                    this.x = anim.frames[anim.curframe % anim.frames.length] * this.resolution;
+                }
             }
+        }
+    }, {
+        key: "onAnimate",
+        value: function onAnimate() {
+            if (this.jumpSprite || this.jumpSprite === 0) {
+                this.x = this.jumpSprite * this.resolution;
+            }
+        }
+    }, {
+        key: "setPauseAnimation",
+        value: function setPauseAnimation(boolean) {
+            this.animPaused = boolean;
         }
     }]);
 
@@ -615,7 +637,7 @@ var Sprite = function () {
 
 var Entity = function () {
     function Entity() {
-        var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { color: "#fff", x: 0, y: 0, w: 0, h: 0, r: 0, rigid: false, collider: false };
+        var a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { camera: this.camera, color: "#fff", x: 0, y: 0, w: 0, h: 0, r: 0, rigid: false, collider: false };
 
         _classCallCheck(this, Entity);
 
@@ -623,6 +645,7 @@ var Entity = function () {
         this.force = new Vector(0, 0);
         this.velocity = new Vector(0, 0);
         this.gravity = -9.81;
+        this.camera = a.camera;
         this.attr = {
             color: a.color,
             w: a.w,
