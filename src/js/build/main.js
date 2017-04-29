@@ -43,13 +43,12 @@ var Main = function () {
         value: function init() {
 
             this.width = window.innerWidth;
-            this.height = window.innerHeight;
-
-            this.blockSize = 18;
-
             if (screen.width > 720) {
                 this.width = 600;
             }
+            this.height = 350;
+
+            this.blockSize = 18;
 
             this.Menu = new _Menu(this);
             this.Unlocks = new _Unlocks(this);
@@ -57,14 +56,31 @@ var Main = function () {
 
             this.initScene();
 
-            //Unlock
-            //this.Unlocks.createUnlock({
-            //    title: "Get a highscore of 5000",
-            //    target: 5000,
-            //    f() { this.setCurrentSkin(Assets.skins[1]) },
-            //    desc: "Animation!",
-            //    aim: this.getHighscore.bind(this)
-            //});
+            //Init unlocks from assets
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = Assets.getUnlocks(this)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var u = _step.value;
+
+                    this.Unlocks.createUnlock({ title: u.title, target: u.target, f: u.f, desc: u.desc, aim: u.aim });
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
         }
     }, {
         key: "initScene",
@@ -123,6 +139,7 @@ var Main = function () {
         key: "reset",
         value: function reset() {
             this.ground = [];
+            this.lastId = 0;
             this.Renderer.renderGroups = [];
             this.initScene();
             this.run();
@@ -130,11 +147,7 @@ var Main = function () {
     }, {
         key: "onRender",
         value: function onRender() {
-
             this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width / 80, 60);
-
-            //this.camera.location.x -= 3;
-            //this.player.location.x += 3;
         }
     }, {
         key: "onUpdate",
@@ -200,7 +213,6 @@ var Main = function () {
         key: "gameOver",
         value: function gameOver() {
             this.isGameOver = true;
-            this.lastId = 0;
             this.pause();
             this.crashes++;
             var score = this.score + 1;
@@ -276,12 +288,7 @@ var Player = function (_Entity) {
     }, {
         key: "onAnimate",
         value: function onAnimate() {
-            if (this.airborn) this.sprite.x = 4;
-        }
-    }, {
-        key: "onRender",
-        value: function onRender() {
-            this.keepHistory();
+            if (this.airborn) this.sprite.x = 0;
         }
     }, {
         key: "keepHistory",
@@ -320,12 +327,6 @@ var Block = function (_Entity2) {
                 this.clickCounter = 0;
                 this.location.y = 0 + this.attr.r;
             }
-        }
-    }, {
-        key: "onAnimate",
-        value: function onAnimate() {
-            // if animated sprite
-            if (this.airborn) this.sprite.x = 3;
         }
     }]);
 

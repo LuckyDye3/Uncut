@@ -297,6 +297,7 @@ var _Renderer = function () {
                     }
                     _this2.draw(_this2.camera);
                 }
+
                 _this2.framerate = 1000 / (curtick - lasttick);
                 lasttick = curtick;
 
@@ -330,7 +331,7 @@ var _Renderer = function () {
             this.clearCanvas();
             // make camera relative to the canvas center
             var origin = new Location(this.viewport.width / 2 + camera.location.x, this.viewport.height / 2 + camera.location.y);
-            var count = 0;
+
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
@@ -350,7 +351,6 @@ var _Renderer = function () {
                                 var e = _step2.value;
 
                                 if (-e.location.x < this.camera.location.x + this.viewport.width / 2 + 30 && -e.location.x > this.camera.location.x - this.viewport.width / 2 - 30) {
-                                    count++;
                                     switch (e.type) {
                                         case "SPRITE":
                                             this.drawSprite(origin, e.sprite, e.location, e.attr.w, e.attr.h);
@@ -368,7 +368,6 @@ var _Renderer = function () {
                                     } catch (e) {}
                                 }
                             }
-                            //console.log(count); //count of objects on screen
                         } catch (err) {
                             _didIteratorError2 = true;
                             _iteratorError2 = err;
@@ -470,7 +469,7 @@ var _Renderer = function () {
         key: "clearCanvas",
         value: function clearCanvas() {
             var ctx = this.viewport.context;
-            ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
+            ctx.clearRect(0, 0, this.viewport.width, 240);
         }
     }, {
         key: "drawText",
@@ -487,9 +486,7 @@ var _Renderer = function () {
             var s = arguments[5];
 
             this.viewport.context.beginPath();
-            var x = loc.x + camera.x - w / 2;
-            var y = loc.y * -1 + camera.y - h / 2;
-            this.viewport.context.rect(Math.floor(x), Math.floor(y), w, h);
+            this.viewport.context.rect(Math.floor(loc.x + camera.x - w / 2), Math.floor(loc.y * -1 + camera.y - h / 2), w, h);
             if (s) {
                 this.viewport.context.strokeStyle = "black";
                 this.viewport.context.stroke();
@@ -644,10 +641,7 @@ var Entity = function () {
                 try {
                     this.onAnimate();
                 } catch (e) {}
-            }
-            try {
-                this.onRender();
-            } catch (err) {}
+            };
         }
     }, {
         key: "update",
@@ -689,7 +683,7 @@ var _Unlocks = function () {
         this.activeUnlocks = [];
         this.doneUnlocks = [];
         this.shownUnlocks = 5;
-        this.cachedDom = $(".unlocksScreen");
+        this.cachedDom = $(".unlocksScreen"); // Node for Unlock list
 
         this.update();
     }
@@ -712,6 +706,11 @@ var _Unlocks = function () {
                 progress.className = "progress";
                 progress.innerText = this.activeUnlocks[u].progress + " / " + this.activeUnlocks[u].value;
                 div.appendChild(progress);
+                var progress_bar = document.createElement("div");
+                progress_bar.className = "progress_bar";
+                var progressInPercentage = this.activeUnlocks[u].progress / this.activeUnlocks[u].value * 100;
+                progress_bar.style.width = progressInPercentage + "%";
+                div.appendChild(progress_bar);
             }
             doneunlocksList.innerHTML = "";
 
@@ -771,6 +770,26 @@ var _Unlocks = function () {
         value: function createUnlock(a) {
             this.availableUnlocks.push(new Unlock(a));
             this.update();
+        }
+    }, {
+        key: "getActive",
+        value: function getActive() {
+            return this.activeUnlocks;
+        }
+    }, {
+        key: "getActiveAmount",
+        value: function getActiveAmount() {
+            return this.activeUnlocks.length;
+        }
+    }, {
+        key: "getDone",
+        value: function getDone() {
+            return this.doneUnlocks;
+        }
+    }, {
+        key: "getDoneAmount",
+        value: function getDoneAmount() {
+            return this.doneUnlocks.length;
         }
     }]);
 
