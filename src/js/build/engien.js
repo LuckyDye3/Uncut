@@ -116,9 +116,8 @@ var _Menu = function () {
         key: "unlocks",
         value: function unlocks() {
             this.main.Unlocks.update();
-            this.startScreen.removeClass("hidden");
-            this.unlocksScreen.addClass("hidden");
-            this.deadScreen.removeClass("hidden");
+            this.clear();
+            this.unlocksScreen.removeClass("hidden");
         }
     }, {
         key: "back",

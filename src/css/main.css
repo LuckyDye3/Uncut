@@ -144,11 +144,11 @@ canvas[data-running="false"] {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
-    padding: 40px 8%;
+    padding: 50px 8%;
     box-sizing: border-box;
     -webkit-transform: none;
-	top: 0;
-	left: 0;
+    top: 0;
+    left: 0;
     transition: -webkit-transform .2s;
 }
 
@@ -190,9 +190,9 @@ canvas[data-running="false"] {
 
 .back.Btn {
 	position: absolute;
-    top: 40px;
-    left: 40px;
-    cursor: pointer;
+	top: 80px;
+	left: 40px;
+	cursor: pointer;
 }
 
 .back.Btn svg {

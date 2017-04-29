@@ -9,10 +9,17 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var game;
+var logging = false;
 
 window.onload = function () {
     game = new Main();
 };
+
+function log(text) {
+    if (logging) {
+        console.log(text);
+    }
+}
 
 var Main = function () {
     function Main() {
@@ -21,12 +28,12 @@ var Main = function () {
         this.width = 0;
         this.height = 0;
 
-        this.ground = [];
-
         this.highscore = 0;
         this.crashes = 0;
 
         this.playerSkin = Assets.skins[0];
+
+        this.isGameOver = false;
 
         this.init();
     }
@@ -94,20 +101,23 @@ var Main = function () {
         key: "run",
         value: function run() {
             // game logic
-            console.log("Running.");
+            log("Running.");
+            this.isGameOver = false;
             this.Renderer.run();
         }
     }, {
         key: "pause",
         value: function pause() {
-            console.log("Paused.");
+            log("Paused.");
             this.Renderer.pause();
         }
     }, {
         key: "resume",
         value: function resume() {
-            console.log("Resuming.");
-            this.Renderer.resume();
+            log("Resuming.");
+            if (!this.isGameOver) {
+                this.Renderer.resume();
+            }
         }
     }, {
         key: "reset",
@@ -121,31 +131,43 @@ var Main = function () {
         key: "onRender",
         value: function onRender() {
 
+            this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width / 80, 60);
+
+            //this.camera.location.x -= 3;
+            //this.player.location.x += 3;
+        }
+    }, {
+        key: "onUpdate",
+        value: function onUpdate(dt) {
+            // on update
+            this.score += 1;
+
             var bs = this.blockSize;
             var w = this.width / bs;
 
-            for (var i = this.ground.length; i--;) {
-                if (-this.ground[i].location.x < this.camera.location.x) {
-                    this.ground.splice(this.ground[this.ground.indexOf(this.ground[i])], 1);
-                }
-            }
+            this.ground = this.Renderer.renderGroups.ground.elements;
 
             var rge = this.Renderer.getRenderGroup("walls").elements;
-            for (var _i in rge) {
-                if (-rge[_i].location.x - this.width / 2 > this.camera.location.x) {
-                    rge.splice(_i, 1);
+            for (var i in rge) {
+                if (rge[i].location.x + this.camera.location.x < -20 - this.width / 2) {
+                    this.Renderer.renderGroups.walls.elements.splice(i, 1);
                 }
             }
 
-            if (this.ground.length < this.width / bs) {
-                var id = this.ground.length > 0 ? this.ground[this.ground.length - 1].id++ : 0;
-                var btemp = new Block(id, {
+            if (!this.lastId) {
+                this.lastId = 0;
+            }
+
+            if (this.ground.length < 1 || this.ground[0].location.x + this.camera.location.x < this.width / 2) {
+
+                var id = this.lastId++;
+
+                var btemp = new Block({
                     x: bs * id,
                     y: -bs / 2,
                     w: bs,
                     h: bs
                 }).rect();
-                this.Renderer.addToRenderGroup("ground", btemp);
                 this.ground.unshift(btemp);
 
                 if (id > w) {
@@ -166,31 +188,29 @@ var Main = function () {
                 }
             }
 
-            this.Renderer.drawText(this.camera, 45, this.score.toString(), this.width - this.width / 80, 60);
+            var lastItem = this.ground.length - 1;
+            if (this.ground[lastItem].location.x + this.camera.location.x < -this.width / 2 - 20) {
+                this.ground.splice(lastItem, 1);
+            }
 
-            this.camera.location.x -= 3;
-            this.player.location.x += 3;
-        }
-    }, {
-        key: "onUpdate",
-        value: function onUpdate(dt) {
-            // on update
-            this.score += 1;
-            //this.camera.location.x -= 190 * dt;
-            //this.player.location.x += 190 * dt;
+            this.camera.location.x -= 190 * dt;
+            this.player.location.x += 190 * dt;
         }
     }, {
         key: "gameOver",
         value: function gameOver() {
+            this.isGameOver = true;
+            this.lastId = 0;
             this.pause();
             this.crashes++;
-            if (this.highscore < this.score) {
-                this.highscore = this.score;
+            var score = this.score + 1;
+            if (this.highscore < score) {
+                this.highscore = score;
             }
             setSaveValue("_crashes", this.crashes);
             setSaveValue("_highscore", this.highscore);
             this.Menu.gameover();
-            $(".score")[0].innerText = this.score;
+            $(".score")[0].innerText = score;
             $(".highscore")[0].innerText = this.highscore;
         }
     }, {
@@ -200,7 +220,9 @@ var Main = function () {
         }
     }, {
         key: "getCrashes",
-        value: function getCrashes() {}
+        value: function getCrashes() {
+            return this.crashes;
+        }
     }, {
         key: "getCurentSkin",
         value: function getCurentSkin() {
@@ -283,13 +305,10 @@ var Player = function (_Entity) {
 var Block = function (_Entity2) {
     _inherits(Block, _Entity2);
 
-    function Block(b, a) {
+    function Block(a) {
         _classCallCheck(this, Block);
 
-        var _this2 = _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, a));
-
-        _this2.id = b;
-        return _this2;
+        return _possibleConstructorReturn(this, (Block.__proto__ || Object.getPrototypeOf(Block)).call(this, a));
     }
 
     _createClass(Block, [{
@@ -383,7 +402,6 @@ var Structure = function () {
                             stroke: true
                         });
                         this.renderGroup.add(btemp);
-                        this.Walls.push(btemp);
                     }
                 }
             }
